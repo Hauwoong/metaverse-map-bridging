@@ -29,7 +29,7 @@
 <text x="54" y="620" font-family="'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif" font-size="12.8" fill="#1F2937">B0 (베이스라인) RIFE / FILM 프레임 보간 — 새 내용을 만들지 못하는 대조군</text>
 <rect x="38" y="662" width="690" height="118" rx="9" fill="#E8F0FE" stroke="#5B8DEF" stroke-width="1.4"/>
 <text x="54" y="688" font-family="'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif" font-size="15.5" font-weight="700" fill="#17407E">⑥ 생성 영상 → 3D 복원 · 좌표 정합</text>
-<text x="54" y="712" font-family="'Cascadia Mono','D2Coding','Consolas',monospace" font-size="12" fill="#1F2937">ⓐ colmap image_registrator  --Mapper.fix_existing_images 1</text>
+<text x="54" y="712" font-family="'Cascadia Mono','D2Coding','Consolas',monospace" font-size="12" fill="#1F2937">ⓐ colmap image_registrator  --Mapper.fix_existing_frames 1</text>
 <text x="54" y="732" font-family="'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif" font-size="12.8" fill="#1F2937">   실촬영 모델을 고정한 채 등록 → 처음부터 공통 좌표계, 정렬 불필요</text>
 <text x="54" y="752" font-family="'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif" font-size="12.8" fill="#1F2937">ⓑ 실패 시: COLMAP ‖ VGGT 독립 복원 + 포즈 기반 Sim(3) — 중심 + 회전</text>
 <text x="54" y="772" font-family="'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif" font-size="12.8" fill="#1F2937">→ 연결 구간 가우시안 G_C</text>

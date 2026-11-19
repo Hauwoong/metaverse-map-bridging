@@ -76,7 +76,7 @@ spec = [
         ("B0 (베이스라인) RIFE / FILM 프레임 보간 — 새 내용을 만들지 못하는 대조군", False)], 78, None),
 
     ("proc", "⑥ 생성 영상 → 3D 복원 · 좌표 정합", [
-        ("ⓐ colmap image_registrator  --Mapper.fix_existing_images 1", True),
+        ("ⓐ colmap image_registrator  --Mapper.fix_existing_frames 1", True),
         ("   실촬영 모델을 고정한 채 등록 → 처음부터 공통 좌표계, 정렬 불필요", False),
         ("ⓑ 실패 시: COLMAP ‖ VGGT 독립 복원 + 포즈 기반 Sim(3) — 중심 + 회전", False),
         ("→ 연결 구간 가우시안 G_C", False)], 118, None),
