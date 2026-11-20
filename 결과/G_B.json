@@ -1,0 +1,17 @@
+{
+  "experiment_name": "G_B",
+  "method_name": "splatfacto",
+  "checkpoint": "/home/hauwoong/data/runs/G_B/splatfacto/run1/nerfstudio_models/step-000029999.ckpt",
+  "results": {
+    "psnr": 28.949562072753906,
+    "psnr_std": 5.528270244598389,
+    "ssim": 0.9243123531341553,
+    "ssim_std": 0.061124641448259354,
+    "lpips": 0.13927824795246124,
+    "lpips_std": 0.10383213311433792,
+    "num_rays_per_sec": 31689934.0,
+    "num_rays_per_sec_std": 12058496.0,
+    "fps": 61.30754852294922,
+    "fps_std": 23.32844352722168
+  }
+}
