@@ -1,0 +1,18 @@
+{
+  "model": "Lightricks/LTX-Video-0.9.5",
+  "width": 1024,
+  "height": 576,
+  "num_frames": 161,
+  "fps": 24,
+  "steps": 40,
+  "guidance": 3.0,
+  "seed": 0,
+  "prompt": "Smooth steady forward camera motion walking through a bright indoor hallway of a university building. Beige painted walls, grey square floor tiles, fluorescent ceiling lights, wooden doors and bulletin boards along both sides. Realistic handheld footage, consistent lighting, no people.",
+  "negative_prompt": "worst quality, inconsistent motion, blurry, jittery, distorted, warped geometry, flickering, text, watermark, people, duplicated walls",
+  "first": "/home/hauwoong/data/끝점/I_A_out.png",
+  "last": "/home/hauwoong/data/끝점/I_B_in.png",
+  "offload": "model",
+  "생성시간_초": 212.1,
+  "VRAM최대_GB": 8.77,
+  "프레임당_초": 1.32
+}
