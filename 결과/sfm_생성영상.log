@@ -1,0 +1,23 @@
+[17:53:53] ================ ⑥-1 생성 영상 단독 SfM ================
+[17:53:54] ---- single : 81 장 (매 2 프레임) ----
+[17:54:12]   모델 1 : 등록 53 / 81 장 (65.4%)
+    Points: 1118
+    Observations: 14358
+    Mean track length: 12.842576
+    Mean observations per image: 270.905660
+    Mean reprojection error: 0.999722px
+[17:54:12] ---- oracle : 161 장 (매 2 프레임) ----
+[17:54:55]   모델 1 : 등록 70 / 161 장 (43.4%)
+    Points: 2980
+    Observations: 25605
+    Mean track length: 8.592282
+    Mean observations per image: 365.785714
+    Mean reprojection error: 0.972229px
+[17:54:55] ---- chain : 145 장 (매 4 프레임) ----
+[17:56:38]   모델 3 : 등록 82 / 145 장 (56.5%)
+    Points: 1667
+    Observations: 25739
+    Mean track length: 15.440312
+    Mean observations per image: 313.890244
+    Mean reprojection error: 1.087008px
+[17:56:38] ================ 끝 ================
