@@ -54,11 +54,12 @@ def points_extent(path_dir):
 
 def main():
     root = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/data/sfm_gen")
+    names = sys.argv[2].split(",") if len(sys.argv) > 2 else None
     print()
     print("%-9s %7s %7s %9s %9s %9s %8s %9s" %
-          ("이름", "등록", "전체", "경로길이", "직선거리", "퍼짐", "직진성", "프레임당"))
+          ("이름", "등록", "전체", "경로길이", "직선거리", "퍼짐", "직진성", "장면대비"))
     print("-" * 78)
-    for name in ("single", "oracle", "chain"):
+    for name in (names or ("single", "oracle", "chain")):
         d = os.path.join(root, name)
         if not os.path.isdir(d):
             continue
@@ -81,9 +82,10 @@ def main():
         size = float(np.linalg.norm(P.max(0)-P.min(0)))
         ext = points_extent(best)
         rel = (path / ext) if ext else float("nan")
+        # 영상 길이(초)는 디렉터리 이름에서 유추할 수 없으므로 메타가 있으면 쓴다.
         print("%-9s %7d %7d %9.3f %9.3f %9.3f %8.3f %9.4f"
               % (name, len(bestC), n_all, path, span, size,
-                 span/max(path, 1e-9), rel/max(len(bestC)-1, 1)))
+                 span/max(path, 1e-9), rel))
 
     # 실촬영 기준선: 합본 모델의 GT1 구간
     merged = os.path.expanduser("~/data/sfm_all/sparse/1")
@@ -101,13 +103,13 @@ def main():
             print("-" * 78)
             print("%-9s %7d %7d %9.3f %9.3f %9.3f %8.3f %9.4f"
                   % ("실촬영GT1", len(gt), len(gt), path, span, size,
-                     span/max(path, 1e-9), rel/max(len(gt)-1, 1)))
+                     span/max(path, 1e-9), rel))
 
     print()
     print("직진성: 1 에 가까우면 똑바로 갔다는 뜻. '얼마나 멀리' 가 아니라 '얼마나 곧게' 다.")
-    print("프레임당 이동: 경로길이 ÷ 점구름 지름 ÷ (프레임수-1).")
-    print("  ← 스케일이 임의인 모델들을 비교하려고 장면 크기로 나눴다.")
-    print("  ← 실촬영GT1 보다 많이 작으면 '그림은 흘러가지만 실제로는 거의 안 움직인' 것이다.")
+    print("장면대비 이동: 경로길이 ÷ 점구름 지름. 스케일이 임의인 모델을 비교하려 장면 크기로 나눴다.")
+    print("  ⚠️ 프레임당으로 나누지 말 것 — 샘플링 간격이 다르면(2.5/6/12fps) 비교가 깨진다.")
+    print("  ⚠️ 영상 길이가 다르면 '초당' 으로 환산해 볼 것. 총량만으로는 빠른지 오래 갔는지 모른다.")
 
 
 if __name__ == "__main__":
