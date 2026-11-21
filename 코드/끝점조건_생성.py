@@ -60,6 +60,13 @@ def main():
     ap.add_argument("--guidance", type=float, default=3.0)
     ap.add_argument("--fps", type=int, default=24)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--guide", default=None,
+                    help="가이드 영상(mp4). 끝점 좌표로 만든 카메라 궤적을 G_A·G_B 에서 "
+                         "렌더해 교차 페이드한 것. 모델에게 '카메라가 이렇게 움직인다' 를 "
+                         "기하로 알려준다. 텍스트 프롬프트로는 줄 수 없는 정보다.")
+    ap.add_argument("--guide-strength", type=float, default=0.2,
+                    help="가이드의 구속 세기. 높이면 floater 까지 따라 그리고, "
+                         "낮추면 무시한다. 0.15~0.3 에서 시작할 것.")
     ap.add_argument("--embeds", default=None,
                     help="프롬프트 임베딩 파일. --encode-only 로 먼저 만들어 두면 "
                          "확산 단계에서 T5-XXL(9GB)을 RAM 에 들고 있지 않아도 된다.")
@@ -138,6 +145,21 @@ def main():
     first, last = load(a.first), load(a.last)
     conditions = build_conditions(first, last, a.num_frames)
 
+    # 가이드 영상을 조건으로 추가한다.
+    # 🔴 왜: 지금까지 모델은 사진 두 장과 텍스트만 봤다. 그래서 이 간극이 15 단위이고
+    #    80° 돌아야 한다는 것을 모르고, 6.7초 안에 그만큼 전진하는 대신 두 끝을 보간했다.
+    #    가이드는 그 카메라 운동을 '기하로' 알려준다. 양 끝은 정확하고 가운데는
+    #    스플랫 커버리지 밖이라 무너져 있으므로, strength 를 낮게 줘 운동만 가져간다.
+    if a.guide:
+        from diffusers.utils import load_video
+        from diffusers.pipelines.ltx.pipeline_ltx_condition import LTXVideoCondition
+        gv = load_video(a.guide)
+        gv = [im.convert("RGB").resize((a.width, a.height), Image.LANCZOS) for im in gv]
+        gv = gv[:a.num_frames]
+        conditions.append(LTXVideoCondition(video=gv, frame_index=0,
+                                            strength=a.guide_strength))
+        print("  가이드 영상 %d프레임, strength=%.2f" % (len(gv), a.guide_strength))
+
     print("== 생성: %dx%d, %d프레임 (%.1f초 @%dfps), %d스텝 ==" %
           (a.width, a.height, a.num_frames, a.num_frames / a.fps, a.fps, a.steps))
     t0 = time.time()
@@ -179,7 +201,7 @@ def main():
                 fps=a.fps, steps=a.steps, guidance=a.guidance, seed=a.seed,
                 prompt=a.prompt, negative_prompt=a.negative,
                 first=a.first, last=a.last,
-                offload=a.offload,
+                offload=a.offload, guide=a.guide, guide_strength=a.guide_strength,
                 생성시간_초=round(dt, 1), VRAM최대_GB=round(peak, 2),
                 프레임당_초=round(dt / a.num_frames, 2))
     mp = str(Path(a.out).with_suffix(".json"))
