@@ -24,7 +24,11 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 HOPS="${1:-6}"          # 걸음 수
 NF="${2:-97}"           # 걸음당 프레임 (8k+1)
-shift 2 2>/dev/null || true
+CFIX="${3:-0}"          # 1 이면 매 걸음 앵커의 색을 A 끝점 기준으로 되돌린다
+shift 3 2>/dev/null || shift $# 2>/dev/null || true
+TAG="h${HOPS}f${NF}$([ "$CFIX" = 1 ] && echo c)"
+O="$O/$TAG"; mkdir -p "$O"
+echo "== 연쇄 설정: ${HOPS}걸음 × ${NF}프레임, 색보정=$CFIX  →  $O =="
 
 CUR="$E/I_A_out.png"
 cp "$CUR" "$O/앵커_00.png"
@@ -44,6 +48,10 @@ for i in $(seq 1 "$HOPS"); do
       -show_entries stream=nb_read_frames -of csv=p=0 "$OUT")
   CUR="$O/앵커_$(printf %02d $i).png"
   ffmpeg -v error -y -i "$OUT" -vf "select=eq(n\,$((N-1)))" -frames:v 1 -update 1 "$CUR"
+  if [ "$CFIX" = 1 ] && [ "$i" -lt "$HOPS" ]; then
+    # 자기 출력을 다시 먹는 구조라 색이 누적으로 민다. 먹이기 전에 되돌린다.
+    "$PY" "/mnt/c/Users/a0103/녹음/메타버스_기말프로젝트/코드/앵커_색보정.py"       --src "$CUR" --ref "$E/I_A_out.png" --out "$CUR"
+  fi
   echo "  앵커 갱신: $CUR"
 done
 
