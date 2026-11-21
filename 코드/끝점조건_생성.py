@@ -31,7 +31,10 @@ DEFAULT_NEGATIVE = (
 
 
 def build_conditions(first, last, num_frames):
-    """LTXVideoCondition 의 필드 이름이 버전마다 다르다. 설치된 것을 보고 맞춘다."""
+    """LTXVideoCondition 의 필드 이름이 버전마다 다르다. 설치된 것을 보고 맞춘다.
+
+    last 가 None 이면 시작 프레임만 조건으로 건다(I2V).
+    """
     from diffusers.pipelines.ltx.pipeline_ltx_condition import LTXVideoCondition
 
     fields = getattr(LTXVideoCondition, "__dataclass_fields__", {})
@@ -44,13 +47,18 @@ def build_conditions(first, last, num_frames):
 
     # 마지막 프레임 인덱스는 음수(-1)가 아니라 명시적인 양수로 준다.
     # 음수 인덱스 지원은 LTX-Video 쪽 문서에 없다 — 되는 것을 확인하기 전에는 쓰지 않는다.
+    if last is None:
+        return [mk(first, 0)]
     return [mk(first, 0), mk(last, num_frames - 1)]
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--first", required=True, help="첫 프레임 (A 의 마지막 시점)")
-    ap.add_argument("--last", required=True, help="마지막 프레임 (B 의 첫 시점)")
+    ap.add_argument("--last", default=None,
+                    help="마지막 프레임 (B 의 첫 시점). 생략하면 끝점 조건 없이 "
+                         "시작 프레임만으로 생성한다(I2V). 짧은 보폭 연쇄에서 쓴다 — "
+                         "끝이 고정되지 않으면 두 끝을 보간할 유인이 없어진다.")
     ap.add_argument("--out", required=True)
     ap.add_argument("--model", default="Lightricks/LTX-Video-0.9.5")
     ap.add_argument("--width", type=int, default=1024)
@@ -142,7 +150,10 @@ def main():
             im = im.resize((a.width, a.height), Image.LANCZOS)
         return im
 
-    first, last = load(a.first), load(a.last)
+    first = load(a.first)
+    last = load(a.last) if a.last else None
+    if last is None:
+        print("  끝점 조건 없음 (I2V) — 시작 프레임만 건다")
     conditions = build_conditions(first, last, a.num_frames)
 
     # 가이드 영상을 조건으로 추가한다.
