@@ -18,8 +18,10 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 N="${1:-4}"            # 웨이포인트 개수
 NF="${2:-97}"          # 구간당 프레임 (8k+1)
-WP="$E/wp$N"
-O="$HOME/data/생성/wp$N"; mkdir -p "$O"
+TAG="${3:-}"           # 비면 wp<N>, 주면 wp_<TAG> 디렉터리를 쓴다
+if [ -n "$TAG" ]; then WP="$E/wp_$TAG"; O="$HOME/data/생성/wp_$TAG"
+else                   WP="$E/wp$N";    O="$HOME/data/생성/wp$N"; fi
+mkdir -p "$O"
 [ -f "$EMB" ] || { echo "!! 프롬프트 임베딩 없음"; exit 1; }
 
 # 구간 목록: A→W1, W1→W2, …, WN→B
