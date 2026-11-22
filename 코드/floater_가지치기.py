@@ -113,12 +113,22 @@ def main():
     for f in ("config.yml", "dataparser_transforms.json"):
         if (run/f).exists():
             shutil.copy(run/f, newrun/f)
-    # config 의 경로를 새 위치로 바꾼다
+    # 🔴 config 의 experiment_name 을 바꿔야 한다.
+    #    nerfstudio 는 output_dir/experiment_name/method/timestamp 로
+    #    체크포인트 폴더를 **조립**하므로, 경로 문자열을 치환하는 것으로는
+    #    안 된다 (그 형태로 파일에 들어 있지 않다).
+    #    한 번 이것으로 원본 체크포인트를 불러와 가지치기 효과가 0으로
+    #    측정됐다 — PSNR 이 소수점까지 같아서 알아챘다.
     cfgp = newrun/"config.yml"
-    txt = cfgp.read_text(encoding="utf-8")
-    txt = txt.replace("G_%s/splatfacto" % a.model,
-                      "G_%s_%s/splatfacto" % (a.model, a.out_tag))
-    cfgp.write_text(txt, encoding="utf-8")
+    lines = cfgp.read_text(encoding="utf-8").splitlines()
+    hit = False
+    for i, l in enumerate(lines):
+        if l.startswith("experiment_name:"):
+            lines[i] = "experiment_name: G_%s_%s" % (a.model, a.out_tag)
+            hit = True
+            break
+    assert hit, "config.yml 에 experiment_name 이 없다"
+    cfgp.write_text(chr(10).join(lines) + chr(10), encoding="utf-8")
     print("  저장 → %s" % newrun)
 
 
