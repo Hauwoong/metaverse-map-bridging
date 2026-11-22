@@ -1,0 +1,60 @@
+[01:05:09] ================ ALIKED vs SIFT (GT1 115장) ================
+[01:05:09] ---- sift (extract=SIFT, match=SIFT_BRUTEFORCE) ----
+[0;33mW20261123 01:06:12.559392 132242803372032 bundle_adjustment_ceres.cc:181] Requested to use GPU for bundle adjustment, but Ceres was compiled without cuDSS support. Falling back to CPU-based sparse solvers.
+[mI20261123 01:06:12.615950 132242803372032 incremental_pipeline.cc:620] Registering image #18 (num_reg_frames=2)
+[01:07:20]   등록 115 / 115장
+    Points: 20489
+    Mean track length: 7.459124
+    Mean observations per image: 1328.956522
+    Mean reprojection error: 0.682194px
+[01:07:20] ---- aliked (extract=ALIKED_N16ROT, match=ALIKED_LIGHTGLUE) ----
+[0;33mW20261123 01:48:46.363155 136707624722432 bundle_adjustment_ceres.cc:181] Requested to use GPU for bundle adjustment, but Ceres was compiled without cuDSS support. Falling back to CPU-based sparse solvers.
+[mI20261123 01:48:46.453465 136707624722432 incremental_pipeline.cc:620] Registering image #99 (num_reg_frames=2)
+[0;33mW20261123 01:48:46.672876 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.673093 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.673581 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.674063 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.674546 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.674712 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.676436 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.676606 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.677109 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.677259 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.677401 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.683448 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.683956 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.684099 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.684313 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.685133 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.685610 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.686465 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.686979 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.687177 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.687428 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.689233 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.689556 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.691424 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.691624 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.691768 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.692603 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.692753 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.693426 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.694093 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.695659 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[mI20261123 01:48:46.723860 136707624722432 incremental_pipeline.cc:620] Registering image #94 (num_reg_frames=4)
+[0;33mW20261123 01:48:46.781548 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.782872 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.783124 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.783948 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:46.784705 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[mI20261123 01:48:46.795481 136707624722432 incremental_pipeline.cc:88] Retriangulation and Global bundle adjustment
+[0;33mW20261123 01:48:48.483624 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:48.484978 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[m[0;33mW20261123 01:48:48.485279 136707624722432 levenberg_marquardt_strategy.cc:123] Linear solver failure. Failed to compute a step: Eigen failure. Unable to perform dense Cholesky factorization.
+[mI20261123 01:48:48.501024 136707624722432 incremental_pipeline.cc:88] Retriangulation and Global bundle adjustment
+[01:50:40]   등록 115 / 115장
+    Points: 14119
+    Mean track length: 8.969757
+    Mean observations per image: 1101.252174
+    Mean reprojection error: 1.068409px
+[01:50:40] ================ 끝 ================
