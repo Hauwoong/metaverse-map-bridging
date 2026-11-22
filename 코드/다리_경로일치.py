@@ -38,7 +38,7 @@ def centers(p):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("tags", nargs="*", default=["chain6", "oracle"])
+    ap.add_argument("tags", nargs="*", default=["chain6", "oracle", "wp4"])
     a = ap.parse_args()
     M = centers(HOME+"/data/sfm_all/sparse/1/images.txt")
     gt = sorted(k for k in M if k.startswith("v1791_") and 162 <= int(k[6:11]) <= 286)
@@ -67,8 +67,14 @@ def main():
         if on.sum():
             # 복도 위 프레임이 GT1 의 어느 구간을 덮는가
             idx = [int(np.argmin(np.linalg.norm(G - x, axis=1))) for x in P[on]]
-            print("    덮는 GT1 구간: %d~%d 번째 프레임 (전체 %d 중 %d개 위치)"
-                  % (min(idx), max(idx), len(gt), len(set(idx))))
+            print("    덮는 GT1 구간: %d~%d 번째 (전체 %d 중 **%d개 위치 = %.0f%%**)"
+                  % (min(idx), max(idx), len(gt), len(set(idx)),
+                     100*len(set(idx))/len(gt)))
+            # 덮인 위치가 한 곳에 뭉쳤는가, 여러 곳에 퍼졌는가
+            u2 = sorted(set(idx))
+            gaps = [u2[i+1]-u2[i] for i in range(len(u2)-1)]
+            cl = 1 + sum(1 for g in gaps if g > 5)
+            print("    덮인 구간 덩어리 %d개  ← 웨이포인트 수와 비교할 것" % cl)
 
 
 if __name__ == "__main__":

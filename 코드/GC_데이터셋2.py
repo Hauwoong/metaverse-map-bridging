@@ -66,28 +66,38 @@ def main():
     B = -M["v1793_00001.png"]["R"].T @ M["v1793_00001.png"]["tv"]
     u = (B - A) / np.linalg.norm(B - A)
 
-    # 오등록 걸러내기.
-    #   (1) A→B 축 진행도가 통로 범위 밖 → 다른 방을 보고 있다
-    #   (2) 축에서 옆으로 너무 벗어남 → 복도 밖에 떠 있다
-    # 🔴 '직전 프레임과의 거리' 로 거르면 안 된다. 등록 결과는 프레임 순서대로
-    #    늘어서 있지 않아서(순서-진행도 상관 0.49) 멀쩡한 프레임까지 날아간다.
-    #    실제로 그 방식은 77장을 3장으로 깎았다.
-    prog = {k: float(np.dot(C[k]-A, u)) for k in gen}
-    lat = {k: float(np.linalg.norm((C[k]-A) - prog[k]*u)) for k in gen}
-    LO, HI, LAT = -1.0, GAP + 1.5, 4.0
-    keep = [k for k in gen if LO <= prog[k] <= HI and lat[k] <= LAT]
-    print("  진행도 [%.1f, %.1f] & 측면이탈 ≤%.1f : %d장 (%d장 제외)"
-          % (LO, HI, LAT, len(keep), len(gen)-len(keep)))
+    # 오등록 걸러내기 — **실촬영 궤적과의 거리**로 판정한다.
+    #
+    # 🔴 A→B 축 진행도와 측면이탈로 거르면 안 된다. 실촬영 GT1 의 축 진행도는
+    #    −3.93~6.92 이고 측면이탈 중앙값이 5.46 이다 — 실제 복도가 직선을 따르지
+    #    않고 뒤로 돌아갔다 온다. 그 기준으로는 **실제 복도 위에 있는 프레임을
+    #    전부 걸러낸다**. 실제로 61장을 날렸다.
+    #
+    # 임계값도 머리로 정하지 않는다: 실촬영 자신의 인접 프레임 간격 × 3.
+    real_all = {k: v for k, v in
+                ((k, -M[k]["R"].T @ M[k]["tv"]) for k in M)}
+    gt = sorted(k for k in M if k.startswith("v1791_") and 162 <= int(k[6:11]) <= 286)
+    G = np.array([real_all[k] for k in gt])
+    delta = float(np.median([np.linalg.norm(G[i+1]-G[i]) for i in range(len(G)-1)]))
+    # 끝점 쪽 실촬영도 포함한다 — G_A·G_B 와 겹치는 구간이 있어야 이음새를 잴 수 있다
+    near = sorted(k for k in M if (k.startswith("v1791_") and int(k[6:11]) >= 104)
+                  or k.startswith("v1793_"))
+    R_all = np.array([real_all[k] for k in near])
+    THR = 3 * delta
+
+    d = {k: float(np.min(np.linalg.norm(R_all - C[k], axis=1))) for k in gen}
+    keep = [k for k in gen if d[k] <= THR]
+    print("  실촬영 궤적과의 거리 ≤ %.4f (간격 %.4f × 3) : %d장 (%d장 제외)"
+          % (THR, delta, len(keep), len(gen)-len(keep)))
     if not keep:
         print("  🔴 남은 프레임이 없다 — 이 다리로는 G_C 를 만들 수 없다")
         return
-    kp0 = np.array([prog[k] for k in keep])
-    mid = ((kp0 > 2) & (kp0 < 13)).sum()
-    print("  그중 중간 구간(2~13) %d장  %s" % (mid, "✅" if mid >= 5 else "⚠️ 재료 부족"))
-
-    kp = np.array([prog[k] for k in keep])
-    print("  남은 진행도 %.2f ~ %.2f,  순서-진행도 상관 %.3f"
-          % (kp.min(), kp.max(), np.corrcoef(np.arange(len(kp)), kp)[0, 1]))
+    # GT1 의 어느 구간을 덮는가
+    idx = sorted({int(np.argmin(np.linalg.norm(G - C[k], axis=1))) for k in keep
+                  if np.min(np.linalg.norm(G - C[k], axis=1)) <= THR})
+    print("  GT1 %d~%d 번째를 덮음 (전체 %d 중 %d개 위치 = %.0f%%)"
+          % (min(idx), max(idx), len(gt), len(idx), 100*len(idx)/len(gt)) if idx
+          else "  GT1 구간은 덮지 않음 (끝점 근처만)")
 
     # 데이터셋 쓰기 (포즈 그대로)
     out = a.out
