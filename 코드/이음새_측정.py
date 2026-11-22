@@ -81,12 +81,26 @@ def main():
     ap.add_argument("--width", type=int, default=1024)
     ap.add_argument("--height", type=int, default=576)
     ap.add_argument("--out", default=str(HOME)+"/data/이음새")
+    ap.add_argument("--scenes", default="A,C",
+                    help="비교할 두 모델. 예: A,C (이음새) 또는 GT1,C (다리 품질)")
+    ap.add_argument("--scene-c", default=str(HOME)+"/data/scenes/C2",
+                    help="G_C 데이터셋 경로 (포즈를 여기서 읽는다)")
+    ap.add_argument("--spread", action="store_true", default=True,
+                    help="전 구간에 고르게 뽑는다")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
 
-    # 겹치는 구간의 포즈 = G_C 데이터셋의 앞부분 (A 쪽 경계에서 출발한다)
-    cpose = read_poses(os.path.join(HOME, "data/scenes/C/colmap/sparse/0/images.txt"))
-    names = sorted(cpose)[:a.n]
+    # 겹치는 구간의 포즈 = G_C 데이터셋의 시점
+    # 🔴 경로를 인자로 받는다. 전에 버린 데이터셋(scenes/C)을 그대로 읽어
+    #    G_C 가 깜깜하게 나온 적이 있다 — 자기 커버리지 밖을 렌더한 것이었다.
+    cpose = read_poses(os.path.join(a.scene_c, "colmap/sparse/0/images.txt"))
+    allnames = sorted(cpose)
+    if a.spread:
+        # 전 구간에 고르게 뽑는다 (앞부분만 보면 한쪽만 본다)
+        idx = np.linspace(0, len(allnames)-1, a.n).round().astype(int)
+        names = [allnames[i] for i in sorted(set(idx))]
+    else:
+        names = allnames[:a.n]
     print("겹침 구간 포즈 %d개: %s … %s" % (len(names), names[0], names[-1]))
 
     cam = [l for l in open(os.path.join(HOME, "data/sfm_all/sparse/1/cameras.txt"))
@@ -96,7 +110,8 @@ def main():
 
     from PIL import Image
     rows = []
-    for scene in ("A", "C"):
+    S1, S2 = a.scenes.split(",")
+    for scene in (S1, S2):
         model, M, s = load_model(scene)
         outs = []
         for n in names:
@@ -110,7 +125,8 @@ def main():
         gc.collect(); torch.cuda.empty_cache()
 
     print()
-    print("%-18s %8s %8s %8s %8s" % ("포즈", "색차", "PSNR", "정규화PSNR", "A알파"))
+    print("비교: G_%s (기준) vs G_%s" % (S1, S2))
+    print("%-18s %8s %8s %8s %8s" % ("포즈", "색차", "PSNR", "정규화PSNR", "기준알파"))
     print("-"*58)
     dc, dp_, dn, da = [], [], [], []
     for i, n in enumerate(names):
@@ -134,7 +150,8 @@ def main():
     print("읽는 법")
     print("  색차 큼          → 톤 보정으로 고칠 수 있다")
     print("  정규화PSNR 낮음  → 기하가 어긋난 것. 색 보정으로 못 고친다")
-    print("  A알파 낮음       → G_A 가 그 시점에서 비어 있다 (병합 시 구멍)")
+    print("  기준알파         ⚠️ 이것으로 '비었는지' 를 판정하면 안 된다 —")
+    print("                     floater 도 불투명해서 알파가 1 로 나온다. 눈으로 볼 것.")
     print("저장: %s" % a.out)
 
 
