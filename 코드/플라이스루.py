@@ -63,6 +63,48 @@ def smooth(path, win):
     return out
 
 
+def slerp_R(Ra, Rb, u):
+    """두 회전 사이를 보간한다. 축-각으로 바꿔 선형 보간하는 것과 같다.
+    🔴 회전 행렬을 성분별로 섞으면 직교성이 깨진다. 반드시 이렇게 한다."""
+    Rrel = Ra.T @ Rb
+    w = float(np.clip((np.trace(Rrel) - 1) / 2, -1, 1))
+    ang = float(np.arccos(w))
+    if ang < 1e-8:
+        return Ra.copy()
+    ax = np.array([Rrel[2, 1]-Rrel[1, 2],
+                   Rrel[0, 2]-Rrel[2, 0],
+                   Rrel[1, 0]-Rrel[0, 1]]) / (2*np.sin(ang))
+    th = ang * u
+    K = np.array([[0, -ax[2], ax[1]], [ax[2], 0, -ax[0]], [-ax[1], ax[0], 0]])
+    return Ra @ (np.eye(3) + np.sin(th)*K + (1-np.cos(th))*(K @ K))
+
+
+def densify(path, k):
+    """인접 자세 사이에 k-1 개를 끼워 넣어 재생 속도를 1/k 로 늦춘다.
+
+    🔴 왜 필요한가 — 이것 때문에 영상이 '깨져' 보였다.
+       촬영 영상에서 자세를 약 2.5fps 로 뽑았는데 24fps 로 재생하면
+       **약 10배속**이 된다. 프레임 하나하나는 선명한데 장면이 순간이동하듯
+       바뀌어서 깨진 것처럼 보인다. 실측: A 구간 40장이 실제로는 16초쯤
+       걸어간 거리인데 영상에서는 1.7초에 지나간다.
+       보간해 채우면 실제 걷는 속도가 된다.
+    """
+    if k <= 1:
+        return path
+    out = []
+    for i in range(len(path)-1):
+        Ra, Rb = path[i][:3, :3], path[i+1][:3, :3]
+        pa, pb = path[i][:3, 3], path[i+1][:3, 3]
+        for j in range(k):
+            u = j / k
+            T = np.eye(4)
+            T[:3, :3] = slerp_R(Ra, Rb, u)
+            T[:3, 3] = (1-u)*pa + u*pb
+            out.append(T)
+    out.append(path[-1].copy())
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sfm", default=str(HOME/"data/sfm_all/sparse/1"))
@@ -70,6 +112,9 @@ def main():
     ap.add_argument("--runs", default=str(HOME/"data/runs"))
     ap.add_argument("--a-tail", type=int, default=40, help="A 꼬리 몇 장")
     ap.add_argument("--b-head", type=int, default=40, help="B 머리 몇 장")
+    ap.add_argument("--interp", type=int, default=1,
+                    help="인접 자세 사이에 끼워 넣을 배수. 촬영 자세가 약 "
+                         "2.5fps 라 24fps 재생은 10배속이 된다. 4~8 을 권한다")
     ap.add_argument("--smooth", type=int, default=5)
     ap.add_argument("--width", type=int, default=960)
     ap.add_argument("--height", type=int, default=540)
@@ -93,7 +138,13 @@ def main():
           % (len(seq), len(A), len(GT), len(B)))
     print("  이음새 위치: %d번째(A→복도), %d번째(복도→B)" % (len(A), len(A)+len(GT)))
 
-    path0 = smooth([imgs[k] for k in seq], a.smooth)
+    # 🔴 보간을 **먼저** 하고 평활화를 나중에 한다.
+    #    순서를 바꾸면 평활화가 성긴 자세 위에서 걸려 코너를 크게 자른다.
+    path0 = densify([imgs[k] for k in seq], a.interp)
+    if a.interp > 1:
+        print("  보간 ×%d → %d 자세 (%.1f초 @%dfps)"
+              % (a.interp, len(path0), len(path0)/a.fps, a.fps))
+    path0 = smooth(path0, a.smooth)
 
     cam = [l for l in open(sfm/"cameras.txt") if not l.startswith("#")][0].split()
     H0, fy = int(cam[3]), float(cam[5])
