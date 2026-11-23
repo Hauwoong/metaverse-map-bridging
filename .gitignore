@@ -1,0 +1,16 @@
+# 촬영 원본 영상 (용량)
+*.mov
+*.MOV
+
+# 학습 산출물
+*.ckpt
+*.ply
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
