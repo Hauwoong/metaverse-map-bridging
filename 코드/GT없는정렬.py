@@ -52,6 +52,30 @@ def proj_so3(M):
     return U @ D @ Vt
 
 
+def trimmed_sim3(src, tgt, names, rounds=6, keep=0.85):
+    """🔴 **강인 정렬.** 최소제곱만 쓰면 소수의 오등록이 전체를 망친다.
+    실제로 GT 없는 등록에서 A 프레임 142장 중 17장이 엉뚱한 곳에 박혀
+    (인접거리 최대 14.37, 합본은 0.19) 거리비 CV 가 56% 로 나왔고
+    '재구성 자체가 나쁘다' 는 틀린 판정을 낼 뻔했다.
+    같은 함정을 이미 겪었다 — '경로 길이가 소수의 오등록에 지배된다(9걸음이 74%)'.
+
+    잔차가 큰 쪽을 조금씩 떨어내며 다시 맞춘다. 남은 비율도 함께 돌려준다.
+    """
+    cur = list(names)
+    s = R = t = None
+    for _ in range(rounds):
+        if len(cur) < 8:
+            break
+        s, R, t = sim3_from_poses(src, tgt, cur)
+        res = np.array([np.linalg.norm(tgt[n]["C"] - (s*(R @ src[n]["C"]) + t))
+                        for n in cur])
+        k = max(8, int(len(cur)*keep))
+        if k >= len(cur):
+            break
+        cur = [cur[i] for i in np.argsort(res)[:k]]
+    return s, R, t, cur
+
+
 def sim3_from_poses(src, tgt, names):
     """회전은 자세에서, 스케일·평행이동은 중심에서 구한다.
     반환: s, R, t  (적용: X_tgt = s R X_src + t)"""
@@ -98,7 +122,20 @@ def main():
     if len(common) < 8:
         print("  🔴 정렬 불가"); return
 
-    # 🔴 퇴화·왜곡을 먼저 본다 — 잔차만으로는 구분되지 않는다
+    # 🔴 **먼저 강인 정렬로 쓸 만한 프레임을 고른다.**
+    #    소수의 오등록이 섞여 있으면 아래 거리비 통계가 통째로 망가진다.
+    s0, R0, t0, inl = trimmed_sim3(S, M, common)
+    print("  강인 정렬: 공통 %d장 중 %d장 사용 (%.0f%%)"
+          % (len(common), len(inl), 100*len(inl)/len(common)))
+    nAi = sum(1 for k in inl if k.startswith("v1791_"))
+    nBi = sum(1 for k in inl if k.startswith("v1793_"))
+    print("            A %d, B %d" % (nAi, nBi))
+    if nAi < 8 or nBi < 8:
+        print("  🔴 한쪽이 거의 다 떨어져 나갔다 — 두 장면이 제대로 묶이지 않았다")
+        return
+    common = inl
+
+    # 🔴 퇴화·왜곡을 본다 — 잔차만으로는 구분되지 않는다 (이상치 제거 후)
     idx = np.linspace(0, len(common)-1, min(60, len(common))).astype(int)
     sub = [common[i] for i in idx]
     ds, dt = [], []
@@ -117,7 +154,7 @@ def main():
         print("     Sim(3) 을 구해도 의미가 없다 — 이 결과는 쓰지 않는다.")
         return
 
-    s, R, t = sim3_from_poses(S, M, common)
+    s, R, t = s0, R0, t0
     res = np.array([np.linalg.norm(M[n]["C"] - (s*(R @ S[n]["C"]) + t)) for n in common])
     print("  Sim(3): 스케일 %.4f | 실촬영 잔차 중앙 %.4f, 95%% %.4f"
           % (s, np.median(res), np.percentile(res, 95)))
