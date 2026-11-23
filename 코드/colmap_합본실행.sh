@@ -4,7 +4,8 @@ LOG="$HOME/data/all.log"
 exec > >(tee -a "$LOG") 2>&1
 log(){ echo "[$(date +%H:%M:%S)] $*"; }
 C="$HOME/miniconda3/envs/colmap/bin/colmap"
-SRC="/mnt/c/Users/a0103/녹음/메타버스_기말프로젝트"
+PROJ="${MV_PROJ:-/mnt/c/Users/a0103/metaverse-map-bridging}"   # 프로젝트 폴더 (윈도우 C:\Users\a0103\metaverse-map-bridging). 다른 위치면 MV_PROJ 로 지정
+SRC="$PROJ"
 W="$HOME/data"; FR="$W/frames_all"; OUT="$W/sfm_all"; FPS=2.5
 DB="$OUT/database.db"
 

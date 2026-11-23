@@ -8,7 +8,8 @@
 # 🔴 이것은 정답(G_GT1)을 전혀 쓰지 않는다. 오라클과 달리 본 방법이 될 수 있다.
 set -u
 PY="$HOME/venv/ltx/bin/python"
-SRC="/mnt/c/Users/a0103/녹음/메타버스_기말프로젝트/코드/끝점조건_생성.py"
+PROJ="${MV_PROJ:-/mnt/c/Users/a0103/metaverse-map-bridging}"   # 프로젝트 폴더 (윈도우 C:\Users\a0103\metaverse-map-bridging). 다른 위치면 MV_PROJ 로 지정
+SRC="$PROJ/코드/끝점조건_생성.py"
 E="$HOME/data/끝점"; O="$HOME/data/생성"; T="$HOME/data/궤적"
 EMB="$O/프롬프트_임베딩.pt"
 mkdir -p "$O"

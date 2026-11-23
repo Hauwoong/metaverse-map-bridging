@@ -11,7 +11,8 @@
 #    WSL 프로세스 트리가 통째로 끌려간다 (코드/3dgs_학습.sh 주석 참조).
 set -u
 PY="$HOME/venv/ltx/bin/python"
-SRC="/mnt/c/Users/a0103/녹음/메타버스_기말프로젝트/코드/끝점조건_생성.py"
+PROJ="${MV_PROJ:-/mnt/c/Users/a0103/metaverse-map-bridging}"   # 프로젝트 폴더 (윈도우 C:\Users\a0103\metaverse-map-bridging). 다른 위치면 MV_PROJ 로 지정
+SRC="$PROJ/코드/끝점조건_생성.py"
 E="$HOME/data/끝점"
 O="$HOME/data/생성"
 EMB="$O/프롬프트_임베딩.pt"

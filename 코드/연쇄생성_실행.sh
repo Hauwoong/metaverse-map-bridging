@@ -15,7 +15,8 @@
 # 🔴 정답(G_GT1)을 전혀 쓰지 않는다. 본 방법이 될 수 있다.
 set -u
 PY="$HOME/venv/ltx/bin/python"
-SRC="/mnt/c/Users/a0103/녹음/메타버스_기말프로젝트/코드/끝점조건_생성.py"
+PROJ="${MV_PROJ:-/mnt/c/Users/a0103/metaverse-map-bridging}"   # 프로젝트 폴더 (윈도우 C:\Users\a0103\metaverse-map-bridging). 다른 위치면 MV_PROJ 로 지정
+SRC="$PROJ/코드/끝점조건_생성.py"
 E="$HOME/data/끝점"; O="$HOME/data/연쇄"
 EMB="$HOME/data/생성/프롬프트_임베딩.pt"
 mkdir -p "$O"
@@ -50,7 +51,7 @@ for i in $(seq 1 "$HOPS"); do
   ffmpeg -v error -y -i "$OUT" -vf "select=eq(n\,$((N-1)))" -frames:v 1 -update 1 "$CUR"
   if [ "$CFIX" = 1 ] && [ "$i" -lt "$HOPS" ]; then
     # 자기 출력을 다시 먹는 구조라 색이 누적으로 민다. 먹이기 전에 되돌린다.
-    "$PY" "/mnt/c/Users/a0103/녹음/메타버스_기말프로젝트/코드/앵커_색보정.py"       --src "$CUR" --ref "$E/I_A_out.png" --out "$CUR"
+    "$PY" "$PROJ/코드/앵커_색보정.py"       --src "$CUR" --ref "$E/I_A_out.png" --out "$CUR"
   fi
   echo "  앵커 갱신: $CUR"
 done
