@@ -115,6 +115,10 @@ def main():
     ap.add_argument("--interp", type=int, default=1,
                     help="인접 자세 사이에 끼워 넣을 배수. 촬영 자세가 약 "
                          "2.5fps 라 24fps 재생은 10배속이 된다. 4~8 을 권한다")
+    ap.add_argument("--gt-from", type=int, default=None,
+                    help="복도 자세를 이 번째부터만 쓴다. 다리가 덮은 구간만 "
+                         "보여줄 때 쓴다 (덮이지 않은 구간은 floater 로 깨진다)")
+    ap.add_argument("--gt-to", type=int, default=None, help="복도 자세 끝 번째")
     ap.add_argument("--smooth", type=int, default=5)
     ap.add_argument("--width", type=int, default=960)
     ap.add_argument("--height", type=int, default=540)
@@ -133,10 +137,24 @@ def main():
     GT = sorted((k for k in imgs if k.startswith("v1791_")
                  and 162 <= ix(k) <= 286), key=ix)
     B  = sorted((k for k in imgs if k.startswith("v1793_")), key=ix)[:a.b_head]
-    seq = A + GT + B
-    print("플라이스루 %d 포즈 = A 꼬리 %d + 복도 %d + B 머리 %d"
-          % (len(seq), len(A), len(GT), len(B)))
-    print("  이음새 위치: %d번째(A→복도), %d번째(복도→B)" % (len(A), len(A)+len(GT)))
+
+    # 🔴 복도 구간을 잘라 쓸 때는 A 꼬리·B 머리를 붙이지 않는다.
+    #    A 는 복도 0번 근처, B 는 125번 너머에 있으므로, 복도 43번부터 시작하면
+    #    A→복도가 공간적으로 순간이동이 되어 더 어색해진다.
+    cut = a.gt_from is not None or a.gt_to is not None
+    if cut:
+        lo = a.gt_from if a.gt_from is not None else 0
+        hi = a.gt_to if a.gt_to is not None else len(GT)-1
+        GT = GT[lo:hi+1]
+        seq = GT
+        print("복도 %d~%d번만 %d 포즈 (A·B 꼬리 생략 — 공간적 순간이동을 피한다)"
+              % (lo, hi, len(seq)))
+    else:
+        seq = A + GT + B
+        print("플라이스루 %d 포즈 = A 꼬리 %d + 복도 %d + B 머리 %d"
+              % (len(seq), len(A), len(GT), len(B)))
+        print("  이음새 위치: %d번째(A→복도), %d번째(복도→B)"
+              % (len(A), len(A)+len(GT)))
 
     # 🔴 보간을 **먼저** 하고 평활화를 나중에 한다.
     #    순서를 바꾸면 평활화가 성긴 자세 위에서 걸려 코너를 크게 자른다.
