@@ -58,14 +58,26 @@ def main():
     ap.add_argument("--lo", type=int, default=162, help="복도(GT1) 시작 프레임")
     ap.add_argument("--hi", type=int, default=286, help="복도 끝 프레임")
     ap.add_argument("--n", type=int, default=4, help="웨이포인트 수")
-    ap.add_argument("--thr", type=int, default=1300,
-                    help="이 수 미만이면 렌더가 뭉개진다 (저텍스처 검증에서 얻은 값)")
+    ap.add_argument("--thr", type=float, default=1300,
+                    help="이 값 미만이면 쓰지 않는다")
+    ap.add_argument("--quality", default=None,
+                    help="""🔴 렌더 품질 파일(이름 비율). 주면 SfM 관측점 수 대신 이것을 쓴다.
+                    SfM 점 수는 '그 자리에서 특징이 잡혔는가' 일 뿐 '3DGS 가 그릴 수
+                    있는가' 가 아니다 — W2(205) 가 1326점으로 통과했는데 렌더는
+                    뭉갰다. 재려는 것을 직접 재야 한다. (코드/앵커_렌더품질.py)""")
     ap.add_argument("--min-gap", type=int, default=12,
                     dest="min_gap", help="이보다 짧은 구간은 만들지 않는다")
     ap.add_argument("--out", default=None, help="목록.txt 로 쓸 경로")
     a = ap.parse_args()
 
-    cnt = read_counts(os.path.join(a.model, "images.txt"))
+    if a.quality:
+        cnt = {}
+        for line in open(a.quality, encoding="utf-8"):
+            w = line.split()
+            if len(w) == 2:
+                cnt[w[0]] = float(w[1])
+    else:
+        cnt = read_counts(os.path.join(a.model, "images.txt"))
     gt = sorted(((ix(n), n) for n in cnt
                  if n.startswith("v1791_") and a.lo <= ix(n) <= a.hi))
     if not gt:
@@ -74,14 +86,14 @@ def main():
 
     # ---- 품질 곡선 ----
     print("== 복도 복원 품질 (관측 3D 점 수) ==")
-    print("   프레임 %d~%d, %d장 | 중앙 %d, 최소 %d, 최대 %d"
+    print("   프레임 %d~%d, %d장 | 중앙 %.3g, 최소 %.3g, 최대 %.3g"
           % (gt[0][0], gt[-1][0], len(gt), np.median(c), c.min(), c.max()))
     step = max(1, len(gt) // 20)
-    print("   %-8s %-7s %s" % ("프레임", "점수", "막대 (임계 %d)" % a.thr))
+    print("   %-8s %-7s %s" % ("프레임", "점수", "막대 (임계 %.3g)" % a.thr))
     for k in range(0, len(gt), step):
         v = c[k]
         bar = "#" * int(30 * v / max(c.max(), 1))
-        print("   %-8d %-7d %s%s" % (gt[k][0], v, bar, "" if v >= a.thr else "  🔴"))
+        print("   %-8d %-7.3g %s%s" % (gt[k][0], v, bar, "" if v >= a.thr else "  🔴"))
 
     ok = c >= a.thr
     print("\n   임계 통과 %d/%d (%.0f%%)" % (ok.sum(), len(ok), 100 * ok.mean()))
@@ -165,7 +177,7 @@ def main():
     print("\n== 고른 웨이포인트 ==")
     print("   %-5s %-9s %-7s %s" % ("", "프레임", "점수", "비고"))
     for i, k in enumerate(chosen, 1):
-        print("   W%-4d %-9d %-7d %s" % (i, gt[k][0], c[k], gt[k][1]))
+        print("   W%-4d %-9d %-7.3g %s" % (i, gt[k][0], c[k], gt[k][1]))
 
     # 구간 길이 — 한 구간만 길면 거기서 뭉갠다 (wp4 의 seg01 이 그랬다)
     pts = [START] + [gt[k][0] for k in chosen] + [END]

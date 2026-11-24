@@ -42,36 +42,40 @@ mkdir -p "$WP" "$O"
 
 log "================ 품질 기준 웨이포인트 재생성 ($TAG) ================"
 
-# 1) 자리 고르기
-rm -f "$WP/목록.txt"
-"$GSPY" "$PROJ/코드/웨이포인트_품질선별.py" --n "$N" --out "$WP/목록.txt" \
-   2>&1 | tee -a "$LOG" | sed -n '/고른 웨이포인트/,$p'
-[ -s "$WP/목록.txt" ] || { log "🔴 선별 실패"; exit 1; }
-read -r -a NF < "$WP/프레임수.txt"
-log "구간별 프레임 수: ${NF[*]}"
-
-# 2) G_GT1 렌더에서 그 프레임을 꺼낸다 (없으면 먼저 렌더)
+# 0) G_GT1 렌더 (없으면 한 번만)
 if [ ! -d "$E/G_GT1" ]; then
   log "G_GT1 데이터셋 렌더 (한 번만)"
   ns-render dataset --load-config "$RUN/G_GT1/splatfacto/run1/config.yml" \
     --output-path "$E/G_GT1" --split train+test --rendered-output-names rgb \
     < /dev/null >> "$LOG" 2>&1
 fi
+
+# 1) 🔴 **렌더 자체의 품질**을 잰다. SfM 관측점 수로 거르면 안 된다 —
+#    W2(205) 는 1326점으로 통과했는데 렌더는 완전히 뭉갰다.
+#    SfM 점 수는 '거기서 특징이 잡혔는가' 일 뿐 '3DGS 가 그릴 수 있는가' 가 아니다.
+Q="$E/렌더품질.txt"
+[ -f "$Q" ] || "$PY" "$PROJ/코드/앵커_렌더품질.py" --out "$Q" >> "$LOG" 2>&1
+[ -s "$Q" ] || { log "🔴 렌더 품질 측정 실패"; exit 1; }
+
+# 2) 자리 고르기
+rm -f "$WP/목록.txt" "$WP/프레임수.txt"
+"$GSPY" "$PROJ/코드/웨이포인트_품질선별.py" --n "$N" --quality "$Q" --thr 0.5 \
+   --out "$WP/목록.txt" 2>&1 | tee -a "$LOG" | sed -n '/쓸 수 있는 구간/,$p'
+[ -s "$WP/목록.txt" ] || { log "🔴 선별 실패"; exit 1; }
+read -r -a NF < "$WP/프레임수.txt"
+log "구간별 프레임 수: ${NF[*]}"
+
+# 3) 그 프레임의 렌더를 앵커로 꺼낸다
 i=0
 while read -r F; do
-  i=$((i+1)); B="${F%.png}"
+  i=$((i+1)); B="${F%.*}"          # .png 도 .jpg 도 벗긴다
   S=$(find "$E/G_GT1" -type f \( -name "$B.jpg" -o -name "$B.png" \) | head -1)
   # 🔴 -nostdin 필수. 없으면 ffmpeg 이 while 의 stdin(목록)을 먹어 다음 줄이 사라진다.
   [ -n "$S" ] && ffmpeg -nostdin -v error -y -i "$S" "$WP/W$i.png" \
               || { log "🔴 W$i 못 찾음 ($B)"; exit 1; }
-  log "  W$i <- $B  ($(stat -c%s "$WP/W$i.png") bytes)"
+  log "  W$i <- $B  특징비 $(awk -v b="$B" '$1 ~ b {print $2}' "$Q")"
 done < "$WP/목록.txt"
 NW=$i
-
-# 🔴 렌더가 뭉개졌는지 **생성 전에** 확인한다. 파일 크기가 작으면 디테일이 없다.
-#    wp4 의 W1 은 258KB 로 나머지(538~550KB)의 절반이었고, 그게 뭉갬의 신호였다.
-MIN=$(for k in $(seq 1 $NW); do stat -c%s "$WP/W$k.png"; done | sort -n | head -1)
-log "앵커 최소 크기 ${MIN} bytes $([ "$MIN" -lt 350000 ] && echo '🔴 뭉개졌을 수 있다' || echo '✅')"
 
 # 3) 구간 생성 — A_out → W1 → … → WN → B_in
 PTS=("$E/I_A_out.png"); for k in $(seq 1 $NW); do PTS+=("$WP/W$k.png"); done
