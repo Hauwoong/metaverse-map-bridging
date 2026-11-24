@@ -1,0 +1,19 @@
+# 🔴 WSL 의 bash 가 CRLF 스크립트를 못 돌린다.
+#    `set: -: invalid option` / `$'\r': command not found` / `syntax error:
+#    unexpected end of file` 셋이 한꺼번에 나오면 전부 이 원인이다.
+#    윈도 git 의 core.autocrlf=true 가 체크아웃할 때 LF 를 CRLF 로 바꾸기 때문에,
+#    맥에서 쓴 스크립트를 윈도에서 받으면 그대로 깨진다.
+#    여기서 eol=lf 로 못박아 두면 양쪽 모두 LF 로 유지된다.
+*.sh  text eol=lf
+*.py  text eol=lf
+*.md  text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+
+*.pdf binary
+*.mp4 binary
+*.mov binary
+*.ply binary
+*.png binary
+*.jpg binary
+*.npz binary
